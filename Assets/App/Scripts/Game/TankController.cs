@@ -5,7 +5,7 @@ public class TankController : MonoBehaviour {
     [SerializeField] GameObject tank;
     [SerializeField] float speed;
     float screenRatio;
-    Vector3 ctrlPos = new Vector3(120f, 120f, 0);
+    Vector3 ctrlPos = new Vector3(160f, 180f, 0);
     float rad;
     float dis;
     bool isTouch = false;
@@ -19,9 +19,9 @@ public class TankController : MonoBehaviour {
         if(isTouchCtrl) {
             Vector3 oldPos = tank.transform.position;
             Vector3 newPos = new Vector3(
-                oldPos.x + speed * Mathf.Cos(rad) * dis,
+                oldPos.x + speed * Mathf.Cos(rad) * (dis > 110 ? 110 : dis),
                 0,
-                oldPos.z + speed * Mathf.Sin(rad) * dis
+                oldPos.z + speed * Mathf.Sin(rad) * (dis > 110 ? 110 : dis)
             );
             float angle = rad * Mathf.Rad2Deg - 90;
             tank.rigidbody.velocity = Vector3.zero;
@@ -42,7 +42,7 @@ public class TankController : MonoBehaviour {
             isTouchCtrl = true;
             rad = Mathf.Atan2(pos.y - ctrlPos.y, pos.x - ctrlPos.x);
         }  else {
-            isTouchCtrl = false;
+//            isTouchCtrl = false;
         }
     }
 
