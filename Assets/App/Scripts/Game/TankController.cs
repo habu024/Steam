@@ -3,6 +3,7 @@ using System.Collections;
 
 public class TankController : MonoBehaviour {
     [SerializeField] GameObject tank;
+    [SerializeField] CanonBall canonBall;
     [SerializeField] float speed;
     float screenRatio;
     Vector3 ctrlPos = new Vector3(160f, 180f, 0);
@@ -56,5 +57,12 @@ public class TankController : MonoBehaviour {
         Debug.Log("Release");
         isTouch = false;
         isTouchCtrl = false;
+        Shot(data.screenPosition);
+    }
+    
+    void Shot(Vector3 pos) {
+        float angle = rad * Mathf.Rad2Deg - 90;
+        CanonBall c = Instantiate(canonBall, tank.transform.position, Quaternion.Euler(0, 0, 0)) as CanonBall;
+        c.rigidbody.AddForce(new Vector3(10 * rad * Mathf.Sin(rad), 0, 10 * rad * Mathf.Cos(rad)), ForceMode.Impulse);
     }
 }
