@@ -3,8 +3,8 @@ using System.Collections;
 
 public class TankController : MonoBehaviour {
     [SerializeField] GameObject tank;
-    [SerializeField] CanonBall canonBall;
     [SerializeField] float speed;
+    Camera nguiCamera;
     float screenRatio;
     Vector3 ctrlPos = new Vector3(160f, 180f, 0);
     float rad;
@@ -14,6 +14,7 @@ public class TankController : MonoBehaviour {
 
     void Start() {
         screenRatio = Screen.width > Screen.height ? 640f / Screen.height : 640f / Screen.width;
+        nguiCamera = GameObject.FindGameObjectWithTag("NGUICamera").GetComponent<Camera>();
     }
 
     void Update() {
@@ -32,8 +33,9 @@ public class TankController : MonoBehaviour {
     }
 
     void Touch(TouchData data) {
-        Debug.Log(data.screenPosition * screenRatio);
+
         isTouch = true;
+
     }
     
     void Drag(TouchData data) {
@@ -57,12 +59,5 @@ public class TankController : MonoBehaviour {
         Debug.Log("Release");
         isTouch = false;
         isTouchCtrl = false;
-        Shot(data.screenPosition);
-    }
-    
-    void Shot(Vector3 pos) {
-        float angle = rad * Mathf.Rad2Deg - 90;
-        CanonBall c = Instantiate(canonBall, tank.transform.position, Quaternion.Euler(0, 0, 0)) as CanonBall;
-        c.rigidbody.AddForce(new Vector3(10 * rad * Mathf.Sin(rad), 0, 10 * rad * Mathf.Cos(rad)), ForceMode.Impulse);
     }
 }
