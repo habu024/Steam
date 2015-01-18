@@ -4,9 +4,10 @@ using System.Collections;
 public class TankController : MonoBehaviour {
     [SerializeField] GameObject tank;
     [SerializeField] float speed;
+    [SerializeField] UISprite ctrlBase;
     Camera nguiCamera;
     float screenRatio;
-    Vector3 ctrlPos = new Vector3(160f, 180f, 0);
+    Vector3 ctrlPos = new Vector3(0, 0, 0);
     float rad;
     float dis;
     bool isTouch = false;
@@ -33,20 +34,22 @@ public class TankController : MonoBehaviour {
     }
 
     void Touch(TouchData data) {
-
         isTouch = true;
-
+        ctrlPos = data.screenPosition * screenRatio;
+        ctrlBase.transform.localPosition = new Vector3(
+            (data.screenPosition.x - Screen.width  / 2) * screenRatio,
+            (data.screenPosition.y - Screen.height / 2) * screenRatio,
+            0
+        );
+        ctrlBase.gameObject.SetActive(true);
     }
     
     void Drag(TouchData data) {
         Vector3 pos = data.screenPosition * screenRatio;
         dis = Vector3.Distance(pos, ctrlPos);
-        if(dis < 110) {
-            isTouchCtrl = true;
-            rad = Mathf.Atan2(pos.y - ctrlPos.y, pos.x - ctrlPos.x);
-        }  else {
-//            isTouchCtrl = false;
-        }
+
+        isTouchCtrl = true;
+        rad = Mathf.Atan2(pos.y - ctrlPos.y, pos.x - ctrlPos.x);
     }
 
     void Leave(TouchData data) {
@@ -59,5 +62,6 @@ public class TankController : MonoBehaviour {
         Debug.Log("Release");
         isTouch = false;
         isTouchCtrl = false;
+        ctrlBase.gameObject.SetActive(false);
     }
 }
