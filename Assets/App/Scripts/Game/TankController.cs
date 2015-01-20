@@ -26,10 +26,10 @@ public class TankController : MonoBehaviour {
                 oldPos.z + speed * Mathf.Sin(rad) * (dis > 110 ? 110 : dis)
             );
             float angle = rad * Mathf.Rad2Deg - 90;
-            tank.rigidbody.velocity = Vector3.zero;
             tank.transform.position = newPos;
             tank.transform.rotation = Quaternion.AngleAxis(angle, Vector3.down);
         }
+        tank.rigidbody.velocity = Vector3.zero;
     }
 
     void Touch(TouchData data) {
