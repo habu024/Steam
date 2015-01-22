@@ -1,17 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class TouchController : MonoBehaviour {
+public class MultiTouchController : MonoBehaviour {
     [SerializeField] int rayDistance = 1000;
 
     private Camera cam;
     private Ray ray;
     private List<RaycastHit> hitList;
     private List<GameObject> selectedList;
-    private List<TouchReceiver> touchRecieverList;
+    private List<MultiTouchReceiver> touchRecieverList;
     private List<Vector3> worldPositionList;
-    private int touchId = -1;
-    private Vector3 point;
 
     void Awake() {
         cam = GetComponent<Camera>();
@@ -24,20 +22,7 @@ public class TouchController : MonoBehaviour {
 
     private void GetTouchState() {
         if(Input.GetMouseButtonDown(0) || Input.GetMouseButton(0)) {
-            if(Input.touchCount == 1) {
-                touchId = Input.GetTouch(0).fingerId;
-                point = Input.GetTouch(0).position;
-            } else if(Input.touchCount > 1) {
-                foreach(Touch touch in Input.touches) {
-                    if(touch.fingerId == touchId || touchId == -1) {
-                        touchId = touch.fingerId;
-                        point = touch.position;
-                    }
-                }
-            } else {
-                point = Input.mousePosition;
-            }
-            ray = cam.ScreenPointToRay(point);
+            ray = cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit[] hits = Physics.RaycastAll(ray, rayDistance);
             hitList = new List<RaycastHit>();
 
@@ -69,7 +54,7 @@ public class TouchController : MonoBehaviour {
                     Reset();
                     foreach(RaycastHit hit in hitList) {
                         GameObject obj = hit.collider.gameObject;
-                        TouchReceiver receiver = obj.GetComponent<TouchReceiver>();
+                        MultiTouchReceiver receiver = obj.GetComponent<MultiTouchReceiver>();
                         if(receiver != null) {
                             selectedList.Add(obj);
                             touchRecieverList.Add(receiver);
@@ -101,7 +86,6 @@ public class TouchController : MonoBehaviour {
         }
         if(Input.GetMouseButtonUp(0)) {
             for(int i = 0, l = touchRecieverList.Count; i < l; i++) {
-                touchId = -1;
                 touchRecieverList[i].RecieveEnd(worldPositionList[i], Input.mousePosition, i, l);
             }
             Reset();
@@ -110,7 +94,7 @@ public class TouchController : MonoBehaviour {
 
     private void Reset() {
         selectedList = new List<GameObject>();
-        touchRecieverList = new List<TouchReceiver>();
+        touchRecieverList = new List<MultiTouchReceiver>();
         worldPositionList = new List<Vector3>();
     }
 }
