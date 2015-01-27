@@ -26,16 +26,21 @@ public class TouchController : MonoBehaviour {
         if(Input.GetMouseButtonDown(0) || Input.GetMouseButton(0)) {
             if(Input.touchCount == 1) {
                 touchId = Input.GetTouch(0).fingerId;
-                point = Input.GetTouch(0).position;
+                point = new Vector3(Input.GetTouch(0).position.x + Screen.width,Input.GetTouch(0).position.y,0) ;
+                Debug.Log("single touch" + point);
             } else if(Input.touchCount > 1) {
                 foreach(Touch touch in Input.touches) {
                     if(touch.fingerId == touchId || touchId == -1) {
                         touchId = touch.fingerId;
                         point = touch.position;
                     }
+                    Debug.Log("multi touch:" + touch.fingerId);
                 }
+
             } else {
+                touchId = -1;
                 point = Input.mousePosition;
+                Debug.Log("mouse" + point);
             }
             ray = cam.ScreenPointToRay(point);
             RaycastHit[] hits = Physics.RaycastAll(ray, rayDistance);
@@ -67,9 +72,11 @@ public class TouchController : MonoBehaviour {
                     Reset();
                 } else {
                     Reset();
+//                    Debug.Log(hitList.Count);
                     foreach(RaycastHit hit in hitList) {
                         GameObject obj = hit.collider.gameObject;
                         TouchReceiver receiver = obj.GetComponent<TouchReceiver>();
+
                         if(receiver != null) {
                             selectedList.Add(obj);
                             touchRecieverList.Add(receiver);
@@ -80,7 +87,7 @@ public class TouchController : MonoBehaviour {
             } else {
                 if(touchRecieverList.Count > 0) {
                     for(int i = 0, l = touchRecieverList.Count; i < l; i++) {
-                        touchRecieverList[i].RecieveLeave(worldPositionList[i], Input.mousePosition, i, l);
+                        touchRecieverList[i].RecieveLeave(worldPositionList[i], point, i, l);
                     }
                 }
                 Reset();
@@ -90,19 +97,20 @@ public class TouchController : MonoBehaviour {
             || touchRecieverList.Count != worldPositionList.Count) {return;}
 
         if(Input.GetMouseButtonDown(0)) {
+            Debug.Log("start");
             for(int i = 0, l = touchRecieverList.Count; i < l; i++) {
-                touchRecieverList[i].RecieveStart(worldPositionList[i], Input.mousePosition, i, l);
+                touchRecieverList[i].RecieveStart(worldPositionList[i], point, i, l);
             }
         }
         if(Input.GetMouseButton(0)) {
             for(int i = 0, l = touchRecieverList.Count; i < l; i++) {
-                touchRecieverList[i].RecieveMove(worldPositionList[i], Input.mousePosition, i, l);
+                touchRecieverList[i].RecieveMove(worldPositionList[i], point, i, l);
             }
         }
         if(Input.GetMouseButtonUp(0)) {
             for(int i = 0, l = touchRecieverList.Count; i < l; i++) {
                 touchId = -1;
-                touchRecieverList[i].RecieveEnd(worldPositionList[i], Input.mousePosition, i, l);
+                touchRecieverList[i].RecieveEnd(worldPositionList[i], point, i, l);
             }
             Reset();
         }
