@@ -1,18 +1,22 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class TankController : MonoBehaviour {
     [SerializeField] GameObject tank;
+    [SerializeField] CanonBall canonBall;
     [SerializeField] float speed;
     [SerializeField] UISprite ctrlBase;
 
+    Ray ray;
     float screenRatio;
     Vector3 ctrlPos = new Vector3(0, 0, 0);
     float rad;
     float dis;
     bool isTouch = false;
     bool isMove = false;
+    float shotId = -1;
     float touchId = -1;
+    Vector3 shotPosition;
     Vector3 touchPosition;
 
     void Start() {
@@ -25,63 +29,48 @@ public class TankController : MonoBehaviour {
         } else if(Input.GetMouseButtonDown(0) || Input.GetMouseButton(0) || Input.GetMouseButtonUp(0)) {
             OnMousePhase();
         }
-
-//        if(Input.touchCount == 1) {
-//            touchId = Input.GetTouch(0).fingerId;
-//            touchPosition = new Vector3(Input.GetTouch(0).position.x + Screen.width,Input.GetTouch(0).position.y,0) ;
-//            Debug.Log("single touch" + touchPosition);
-//            if(Input.touches[0].phase == TouchPhase.Began) {
-//                TouchStart();
-//            }
-//        } else if(Input.touchCount > 1) {
-//            foreach(Touch touch in Input.touches) {
-//                if(touch.fingerId == touchId || touchId == -1) {
-//                    touchId = touch.fingerId;
-//                    touchPosition = touch.position;
-//                }
-//                Debug.Log("multi touch:" + touch.fingerId);
-//            }
-//        } else {
-//            touchId = -1;
-//            touchPosition = Input.mousePosition;
-//            Debug.Log("mouse" + touchPosition);
-//            if(Input.GetMouseButtonDown(0)) {
-//                TouchStart();
-//            } else if(Input.GetMouseButton(0)) {
-//                TouchMove();
-//            }
-//
-//        }
-
-//        if(isMove) {
-//            Vector3 oldPos = tank.transform.position;
-//            Vector3 newPos = new Vector3(
-//                oldPos.x + speed * Mathf.Cos(rad) * (dis > 110 ? 110 : dis),
-//                0,
-//                oldPos.z + speed * Mathf.Sin(rad) * (dis > 110 ? 110 : dis)
-//            );
-//            float angle = rad * Mathf.Rad2Deg - 90;
-//            tank.transform.position = newPos;
-//            tank.transform.rotation = Quaternion.AngleAxis(angle, Vector3.down);
-//        }
-//        tank.rigidbody.velocity = Vector3.zero;
     }
 
     void OnTouchPhase() {
-        if(Input.touchCount == 1) {
-            touchPosition = Input.touches[0].position;
-            touchPosition.x += Screen.width;
-            if(Input.touches[0].phase == TouchPhase.Began) {
-                touchId = Input.GetTouch(0).fingerId;
-                TouchStart();
-//            } else if(Input.touches[0].phase == TouchPhase.Moved) {
-//                TouchMove();
-            } else if(Input.touches[0].phase == TouchPhase.Ended) {
-                TouchEnd();
+        foreach(Touch touch in Input.touches) {
+            if(touch.phase == TouchPhase.Began) {
+                if(touchId < 0) {
+                    touchId = touch.fingerId;
+                    touchPosition = touch.position;
+                    touchPosition.x += Screen.width;
+                    TouchStart();
+                } else if(shotId < 0) {
+                    shotId = touch.fingerId;
+                    shotPosition = touch.position;
+                    shotPosition.x += Screen.width;
+                }
             }
-            TouchMove();
-        } else {
-
+            if(touch.fingerId == touchId) {
+                if(touch.fingerId == touchId) {
+                    touchPosition = touch.position;
+                    touchPosition.x += Screen.width;
+                    TouchMove();
+                }
+            }
+            if(touch.phase == TouchPhase.Ended) {
+                if(touch.fingerId == touchId) {
+                    touchPosition = touch.position;
+                    touchPosition.x += Screen.width;
+                    touchId = -1;
+                    TouchEnd();
+                    if(Vector3.Distance(touchPosition * screenRatio, ctrlPos) < 10f) {
+                        shotId = -1;
+                        Shot(touchPosition);
+                    }
+                } else if(touch.fingerId == shotId) {
+                    Vector3 curPosition = touch.position;
+                    curPosition.x += Screen.width;
+                    shotId = -1;
+                    if(Vector3.Distance(curPosition, shotPosition) < 10f) {
+                        Shot(curPosition);
+                    }
+                }
+            }
         }
     }
 
@@ -94,10 +83,11 @@ public class TankController : MonoBehaviour {
             TouchMove();
         } else if(Input.GetMouseButtonUp(0)) {
             TouchEnd();
+            if(Vector3.Distance(touchPosition * screenRatio, ctrlPos) < 10f) {
+                Shot(touchPosition);
+            }
         }
     }
-    
-
     
     void TouchStart() {
         isTouch = true;
@@ -112,8 +102,7 @@ public class TankController : MonoBehaviour {
     void TouchMove() {
         Vector3 pos = touchPosition * screenRatio;
         dis = Vector3.Distance(pos, ctrlPos);
-
-        if(!isMove && dis > 0.05f) {
+        if(!isMove && dis > 10f) {
             isMove = true;
             ctrlBase.gameObject.SetActive(true);
         }
@@ -131,13 +120,32 @@ public class TankController : MonoBehaviour {
         }
         tank.rigidbody.velocity = Vector3.zero;
     }
-    
-    
-    
+
     void TouchEnd() {
-        Debug.Log("Release");
         isTouch = false;
         isMove = false;
         ctrlBase.gameObject.SetActive(false);
+    }
+
+    void Shot(Vector3 pos) {
+        ray = Camera.main.ScreenPointToRay(pos);
+        RaycastHit[] hits = Physics.RaycastAll(ray, 500);
+        foreach(RaycastHit hit in hits) {
+            GameObject obj = hit.collider.gameObject;
+            TankController receiver = obj.GetComponent<TankController>();
+            if(receiver != null) {
+                Vector3 tankPos = tank.transform.position;
+                float angle = Mathf.Atan2(hit.point.z - tankPos.z, hit.point.x - tankPos.x);
+                CanonBall c = Instantiate(
+                    canonBall,
+                    new Vector3(tankPos.x, tankPos.y + 1.0f, tankPos.z),
+                    Quaternion.Euler(0, 0, 0)
+                ) as CanonBall;
+                c.rigidbody.AddForce(
+                    new Vector3(30 * Mathf.Cos(angle), 0, 30 * Mathf.Sin(angle)),
+                    ForceMode.Impulse
+                );
+            }
+        }
     }
 }

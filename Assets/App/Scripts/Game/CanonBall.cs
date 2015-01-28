@@ -16,7 +16,7 @@ public class CanonBall : MonoBehaviour {
             (gameObject.rigidbody.velocity.x * gameObject.rigidbody.velocity.x) +
             (gameObject.rigidbody.velocity.z * gameObject.rigidbody.velocity.z)
         );
-        if(timer > 0.1f && v < 7) {
+        if(timer > 0.1f && v < 20) {
             Destroy(gameObject);
         }
     }
