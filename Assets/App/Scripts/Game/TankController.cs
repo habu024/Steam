@@ -37,25 +37,33 @@ public class TankController : MonoBehaviour {
                 if(touchId < 0) {
                     touchId = touch.fingerId;
                     touchPosition = touch.position;
+#if UNITY_EDITOR
                     touchPosition.x += Screen.width;
+#endif
                     TouchStart();
                 } else if(shotId < 0) {
                     shotId = touch.fingerId;
                     shotPosition = touch.position;
+#if UNITY_EDITOR
                     shotPosition.x += Screen.width;
+#endif
                 }
             }
             if(touch.fingerId == touchId) {
                 if(touch.fingerId == touchId) {
                     touchPosition = touch.position;
+#if UNITY_EDITOR
                     touchPosition.x += Screen.width;
+#endif
                     TouchMove();
                 }
             }
             if(touch.phase == TouchPhase.Ended) {
                 if(touch.fingerId == touchId) {
                     touchPosition = touch.position;
+#if UNITY_EDITOR
                     touchPosition.x += Screen.width;
+#endif
                     touchId = -1;
                     TouchEnd();
                     if(Vector3.Distance(touchPosition * screenRatio, ctrlPos) < 10f) {
@@ -64,7 +72,9 @@ public class TankController : MonoBehaviour {
                     }
                 } else if(touch.fingerId == shotId) {
                     Vector3 curPosition = touch.position;
+#if UNITY_EDITOR
                     curPosition.x += Screen.width;
+#endif
                     shotId = -1;
                     if(Vector3.Distance(curPosition, shotPosition) < 10f) {
                         Shot(curPosition);
