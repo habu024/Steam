@@ -12,7 +12,6 @@ public class TankController : MonoBehaviour {
     Vector3 ctrlPos = new Vector3(0, 0, 0);
     float rad;
     float dis;
-    bool isTouch = false;
     bool isMove = false;
     float shotId = -1;
     float touchId = -1;
@@ -93,14 +92,13 @@ public class TankController : MonoBehaviour {
             TouchMove();
         } else if(Input.GetMouseButtonUp(0)) {
             TouchEnd();
-            if(Vector3.Distance(touchPosition * screenRatio, ctrlPos) < 10f) {
+            if(Vector3.Distance(touchPosition * screenRatio, ctrlPos) < 20f) {
                 Shot(touchPosition);
             }
         }
     }
     
-    void TouchStart() {
-        isTouch = true;
+    void TouchStart() {;
         ctrlPos = touchPosition * screenRatio;
         ctrlBase.transform.localPosition = new Vector3(
             (touchPosition.x - Screen.width  / 2) * screenRatio,
@@ -132,7 +130,6 @@ public class TankController : MonoBehaviour {
     }
 
     void TouchEnd() {
-        isTouch = false;
         isMove = false;
         ctrlBase.gameObject.SetActive(false);
     }
