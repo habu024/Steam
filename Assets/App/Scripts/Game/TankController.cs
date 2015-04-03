@@ -5,7 +5,7 @@ public class TankController : MonoBehaviour {
     [SerializeField] GameObject tank;
     [SerializeField] CanonBall canonBall;
     [SerializeField] float speed;
-    [SerializeField] UISprite ctrlBase;
+    [SerializeField] GameObject ctrlBase;
 
     Ray ray;
     float screenRatio;
@@ -22,7 +22,6 @@ public class TankController : MonoBehaviour {
     void Start() {
         screenRatio = Screen.width > Screen.height ? 640f / Screen.height : 640f / Screen.width;
         animator = tank.transform.Find("Sprite").GetComponent<Animator>();
-        Debug.Log(animator);
     }
 
     void Update() {
@@ -104,8 +103,8 @@ public class TankController : MonoBehaviour {
     void TouchStart() {;
         ctrlPos = touchPosition * screenRatio;
         ctrlBase.transform.localPosition = new Vector3(
-            (touchPosition.x - Screen.width  / 2) * screenRatio,
-            (touchPosition.y - Screen.height / 2) * screenRatio,
+            (touchPosition.x - Screen.width  / 2),
+            (touchPosition.y - Screen.height / 2),
             0
         );
     }
@@ -115,7 +114,7 @@ public class TankController : MonoBehaviour {
         dis = Vector3.Distance(pos, ctrlPos);
         if(!isMove && dis > 10f) {
             isMove = true;
-            ctrlBase.gameObject.SetActive(true);
+            ctrlBase.SetActive(true);
         }
         if(isMove) {
             rad = Mathf.Atan2(pos.y - ctrlPos.y, pos.x - ctrlPos.x);
@@ -160,7 +159,7 @@ public class TankController : MonoBehaviour {
 
     void TouchEnd() {
         isMove = false;
-        ctrlBase.gameObject.SetActive(false);
+        ctrlBase.SetActive(false);
     }
 
     void Shot(Vector3 pos) {
