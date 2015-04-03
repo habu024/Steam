@@ -13,8 +13,8 @@ public class CanonBall : MonoBehaviour {
     void FixedUpdate() {
         timer += Time.deltaTime;
         float v = Mathf.Sqrt(
-            (gameObject.rigidbody.velocity.x * gameObject.rigidbody.velocity.x) +
-            (gameObject.rigidbody.velocity.z * gameObject.rigidbody.velocity.z)
+            (gameObject.GetComponent<Rigidbody>().velocity.x * gameObject.GetComponent<Rigidbody>().velocity.x) +
+            (gameObject.GetComponent<Rigidbody>().velocity.z * gameObject.GetComponent<Rigidbody>().velocity.z)
         );
         if(timer > 0.1f && v < 20) {
             Destroy(gameObject);

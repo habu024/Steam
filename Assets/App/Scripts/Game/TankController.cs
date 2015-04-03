@@ -17,9 +17,12 @@ public class TankController : MonoBehaviour {
     float touchId = -1;
     Vector3 shotPosition;
     Vector3 touchPosition;
+    Animator animator;
 
     void Start() {
         screenRatio = Screen.width > Screen.height ? 640f / Screen.height : 640f / Screen.width;
+        animator = tank.transform.Find("Sprite").GetComponent<Animator>();
+        Debug.Log(animator);
     }
 
     void Update() {
@@ -116,17 +119,43 @@ public class TankController : MonoBehaviour {
         }
         if(isMove) {
             rad = Mathf.Atan2(pos.y - ctrlPos.y, pos.x - ctrlPos.x);
+            float angle = rad * Mathf.Rad2Deg;
+
+            if(angle >= -22.5f && angle < 22.5f) {
+                animator.SetInteger("moveState", 6);
+                rad = 0;
+            } else if(angle >= 22.5f && angle < 67.5f) {
+                animator.SetInteger("moveState", 5);
+                rad = 45 * Mathf.Deg2Rad;
+            } else if(angle >= 67.5f && angle < 112.5f) {
+                animator.SetInteger("moveState", 4);
+                rad = 90 * Mathf.Deg2Rad;
+            } else if(angle >= 112.5f && angle < 157.5f) {
+                animator.SetInteger("moveState", 3);
+                rad = 135 * Mathf.Deg2Rad;
+            } else if(angle >= -157.5f && angle < -112.5f) {
+                animator.SetInteger("moveState", 1);
+                rad = 225 * Mathf.Deg2Rad;
+            } else if(angle >= -112.5f && angle < -67.5f) {
+                animator.SetInteger("moveState", 0);
+                rad = 270 * Mathf.Deg2Rad;
+            } else if(angle >= -67.5f && angle < 0) {
+                animator.SetInteger("moveState", 7);
+                rad = 315 * Mathf.Deg2Rad;
+            } else {
+                animator.SetInteger("moveState", 2);
+                rad = 180 * Mathf.Deg2Rad;
+            }
             Vector3 oldPos = tank.transform.position;
             Vector3 newPos = new Vector3(
-                oldPos.x + speed * Mathf.Cos(rad) * (dis > 110 ? 110 : dis),
+                oldPos.x + speed * Mathf.Cos(rad) * (dis > 60 ? 60 : dis),
                 0,
-                oldPos.z + speed * Mathf.Sin(rad) * (dis > 110 ? 110 : dis)
+                oldPos.z + speed * Mathf.Sin(rad) * (dis > 60 ? 60 : dis)
             );
-            float angle = rad * Mathf.Rad2Deg - 90;
             tank.transform.position = newPos;
-            tank.transform.rotation = Quaternion.AngleAxis(angle, Vector3.down);
+//            tank.transform.rotation = Quaternion.AngleAxis(angle, Vector3.down);
         }
-        tank.rigidbody.velocity = Vector3.zero;
+        tank.GetComponent<Rigidbody>().velocity = Vector3.zero;
     }
 
     void TouchEnd() {
@@ -148,7 +177,7 @@ public class TankController : MonoBehaviour {
                     new Vector3(tankPos.x, tankPos.y + 1.0f, tankPos.z),
                     Quaternion.Euler(0, 0, 0)
                 ) as CanonBall;
-                c.rigidbody.AddForce(
+                c.GetComponent<Rigidbody>().AddForce(
                     new Vector3(30 * Mathf.Cos(angle), 0, 30 * Mathf.Sin(angle)),
                     ForceMode.Impulse
                 );
